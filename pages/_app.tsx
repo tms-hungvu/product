@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "../styles/globals.scss";
 import First from "@/components/Modules/First";
 import Second from "@/components/Modules/Second";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
 import {
   ColorsFormData,
   colorsSchema,
@@ -44,6 +44,17 @@ export default function App({ Component, pageProps }: AppProps) {
     resolver: zodResolver(generalSchema),
     mode: "onChange",
   })
+  const { control } = generalMethod;
+
+  const {  ...rest } = useFieldArray({
+    control,
+    name: "general",
+  });
+
+ 
+
+ 
+
 
   const submitForm = () => {
     firstMethod.trigger();
@@ -54,53 +65,22 @@ export default function App({ Component, pageProps }: AppProps) {
   const second = secondMethod.watch().variants;
   const general = generalMethod.watch().general;
  
-  useEffect(() => {
-    console.log(general)
-    if (Boolean(first.length - 1) ) {
-      const data = first.slice(0, -1).map((color, keyColor: number) => {
-        return {
-          image: color.image,
-          name: color.name,
-          variants: Boolean(second.length === 1)
-            ? [{ value: false, price: 0, price_sale: 0, quantity: 0, SKU: ''}]
-            : second.slice(0, -1).map((variant, keyVariant: number) => {
-               return {
-                  value: variant.value,
-                  price:   0, 
-                  price_sale: 0, 
-                  quantity: 0, 
-                  SKU: '', 
-               }
-            }),
-        };
-      })
-      generalMethod.reset({
-        general: data,
-      })
-     
-    }
-  }, [JSON.stringify(general), JSON.stringify(first), JSON.stringify(second)]);
-
-  //console.log('outside: ', general)
-
-  //console.log(first, second);
- //console.log(general)
   return (
     <>
       <div className="mb-8">
         <FormProvider {...firstMethod}>
-          <Second />
+          <Second general={general} {...rest} />
         </FormProvider>
       </div>
       <div className="h-[1px] bg-black w-full"></div>
       <div className="mt-4">
         <FormProvider {...secondMethod}>
-          <First />
+          <First general={general} {...rest} />
         </FormProvider>
       </div>
       <div className="mt-4">
       <FormProvider {...generalMethod}>
-           <General second={second} />
+           <General second={second} {...rest} />
         </FormProvider>
        
       </div>

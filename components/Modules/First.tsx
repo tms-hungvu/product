@@ -1,13 +1,14 @@
 import { Input } from "antd";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 
-const First = () => {
+const First = ({general, ...rest}: any) => {
   const {
     control,
     handleSubmit,
     trigger,
     formState: { errors },
   } = useFormContext();
+  const {update : updateGeneral, replace : replaceGeneral} = rest;
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: "variants",
@@ -22,9 +23,23 @@ const First = () => {
 //     name: "variants",
 //   });
   //console.log(fields);
-  const handleAddField = (id: string) => {
+  const handleAddField = (id: string, field: any, value: string) => {
+    field.onChange(value);
+    trigger();
+
     if (id == fields[fields.length - 1].id) {
       append({ value: "" });
+      const data = general.map((item: any, key: number) => {
+          return {
+            ...item,
+            variants : item.variants.map((i: any, k: number) => {
+               return 
+            })
+          }
+      })
+
+    }else {
+
     }
   };
   //console.log(errors)
@@ -43,9 +58,7 @@ const First = () => {
                     type="text"
                     placeholder="Enter value"
                     onChange={(e) => {
-                      field.onChange(e.target.value);
-                      handleAddField(item.id);
-                      trigger();
+                      handleAddField(item.id, field, e.target.value);
                     }}
                     value={field.value}
                   />

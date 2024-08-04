@@ -2,19 +2,15 @@ import { Flex, Input } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 
-export default function General({ second }: any) {
-    const idFocus = useRef('');
+export default function General({ second, ...rest }: any) {
+     const {fields} = rest;
+   
     const {
-        watch,
         control,
-        handleSubmit,
         trigger,
         formState: { errors },
     } = useFormContext();
-    const { fields, replace, append, remove, update } = useFieldArray({
-        control,
-        name: "general",
-    });
+  
 
    //const dataGeneral = watch().general;
 
@@ -44,7 +40,7 @@ export default function General({ second }: any) {
 
    
     //console.log('outside useEffect', dataGeneral)
-
+   console.log('field in General', fields)
     return (<div className="relative overflow-x-auto border-[1px] sm:rounded-lg">
         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <thead className="text-xs text-gray-700 uppercase bg-[#f6f6f6] dark:bg-gray-700 dark:text-gray-400">
@@ -72,7 +68,7 @@ export default function General({ second }: any) {
             </thead>
             <tbody>
 
-                {fields.map((item: any, index) => (
+                {fields.map((item: any, index: number) => (
                     <tr key={item.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-[#f6f6f6] dark:hover:bg-gray-600" >
                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center">
                             <Flex vertical align='center' justify='center' gap={10}>

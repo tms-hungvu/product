@@ -1,6 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons';
 
 import { Image, Input, Upload } from 'antd';
+import { ChangeEvent } from 'react';
 import {
   Controller,
   useFieldArray,
@@ -8,17 +9,20 @@ import {
   useWatch,
 } from 'react-hook-form';
 
-const Second = () => {
+const Second = ({ general, ...rest }: any) => {
   const {
     register,
     control,
     handleSubmit,
     reset,
+    watch,
     trigger,
     setError,
     clearErrors,
     formState: { errors },
   } = useFormContext();
+   const { append: appendGeneral, update: updateGeneral, remove: removeGeneral  } = rest;
+
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: 'colors',
@@ -32,21 +36,92 @@ const Second = () => {
   const onSubmit = (data: any) => {
     console.log('submit >>', data);
   };
-  const onChangeFile = (file: any, index: any) => {
+
+
+
+  const handleAddFieldText = (id: string, value: string, index: number) => {
+    if (id == fields[fields.length - 1].id) {
+      append({ image: null, name: '' });
+      appendGeneral( {
+        image: null,
+        name: value,
+        variants: [
+          {
+            value: false,
+            price: 0,
+            price_sale: 0,
+            quantity: 0,
+            SKU: ''
+          }
+        ]
+      });
+     
+    }else {
+      updateGeneral(index, {
+        ...general[index],
+        name: value
+      })
+    }
+  };
+
+  const handleAddFieldFile = (id: string, file: any, index: number) => {
     const newData = {
       image: file.originFileObj,
       name: colorsCurrent[index].name,
     };
     update(index, newData);
     trigger();
-  };
-  const handleAddField = (id: string) => {
- 
-    if(id == fields[fields.length - 1].id){
-        append({ image: null, name: '' });
+
+    if (id == fields[fields.length - 1].id) {
+      append({ image: null, name: '' });
+      appendGeneral( {
+        image: file.originFileObj,
+        name: '',
+        variants: [
+          {
+            value: false,
+            price: 0,
+            price_sale: 0,
+            quantity: 0,
+            SKU: ''
+          }
+        ]
+      });
+     
+    }else {
+      updateGeneral(index, {
+        ...general[index],
+        image: file.originFileObj
+      })
     }
   };
 
+  const changeInput = (e: ChangeEvent<HTMLInputElement>, id: string , field: any, index: number) => {
+    field.onChange(e.target.value);
+    handleAddFieldText(id,e.target.value, index);
+    trigger();
+    
+    
+   // console.log(listColor.colors)
+   //console.log(general)
+  //  const data = general.map((item: any,key: any) => {
+  //     if(key == index) {
+  //        return {
+  //           ...item,
+  //           name: e.target.value
+  //        }
+  //     }
+  //     return item;
+  //  })
+   //setGeneral(data);
+   //console.log(data);
+  
+  }
+
+  const setGeneral = (data: any) => {
+   // replaceGeneral(data);
+  }
+  
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -60,8 +135,7 @@ const Second = () => {
                 showUploadList={false}
                 maxCount={1}
                 onChange={({ file }) => {
-                  onChangeFile(file, index);
-                  handleAddField(item.id);
+                  handleAddFieldFile(item.id, file, index);
                 }}
               >
                 {item.image ? (
@@ -94,13 +168,11 @@ const Second = () => {
                     type="text"
                     placeholder="Enter name"
                     onChange={(e) => {
-                        field.onChange(e.target.value);
-                        handleAddField(item.id);
-                        trigger();
-                      }}
+                      changeInput(e, item.id, field, index)
+                    }}
                     value={field.value}
                   />
-                  
+
                 )}
               />
               {errors?.colors && errors?.colors[index] && (
@@ -109,16 +181,16 @@ const Second = () => {
                 </span>
               )}
 
-{index !==  fields.length - 1 && <button type="button" onClick={() => remove(index)}>
+              {index !== fields.length - 1 && <button type="button" onClick={() => {removeGeneral(index); remove(index)} }>
                 Remove
               </button>}
             </div>
           ))}
         </div>
 
-      
+
       </form>
-    
+
     </>
   );
 };
