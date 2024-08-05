@@ -1,3 +1,4 @@
+import { ErrorMessage } from "@hookform/error-message";
 import { Input } from "antd";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 
@@ -23,25 +24,48 @@ const First = ({general, ...rest}: any) => {
 //     name: "variants",
 //   });
   //console.log(fields);
-  const handleAddField = (id: string, field: any, value: string) => {
+  const handleAddField = (id: string, field: any, value: string, index: number) => {
     field.onChange(value);
     trigger();
 
     if (id == fields[fields.length - 1].id) {
       append({ value: "" });
-      const data = general.map((item: any, key: number) => {
+      const data = general.map((item: any) => {
+          if(item.variants[0].value === false) item.variants = [];
+          return {
+            ...item,
+            variants : [...item.variants, {value: value, price: 0, price_sale: 0, quantity: 0, SKU: ''}]
+          }
+      })
+      replaceGeneral(data);
+    }else {
+      const data = general.map((item: any) => {
           return {
             ...item,
             variants : item.variants.map((i: any, k: number) => {
-               return 
+                if(k === index){
+                  return {
+                    ...i,
+                    value: value
+                  }
+                }
+                return i;
             })
           }
       })
-
-    }else {
-
+      replaceGeneral(data);
     }
   };
+  const onHandleDelete = (index: number) => {
+    remove(index);
+    const data = general.map((item: any, key: number) => {
+      return {
+        ...item,
+        variants : item.variants.length > 1 ? item.variants.filter((_: any, k: number) => { return index !== k}) : [{value: false, price: 0, price_sale: 0, quantity: 0, SKU: ''}]
+      }
+    })
+    replaceGeneral(data);
+  }
   //console.log(errors)
   //console.log(variantsCurrent);
   return (
@@ -58,21 +82,23 @@ const First = ({general, ...rest}: any) => {
                     type="text"
                     placeholder="Enter value"
                     onChange={(e) => {
-                      handleAddField(item.id, field, e.target.value);
+                      handleAddField(item.id, field, e.target.value, index);
                     }}
                     value={field.value}
                   />
                 )}
               />
 
-              {errors?.variants && errors?.variants[index] && (
-                <span className="text-red-500">
-                  {errors?.variants[index]?.value?.message}
-                </span>
-              )}
+                  <ErrorMessage
+                        errors={errors}
+                        name={`variants.${index}.value`}
+                        render={({ message }) => (
+                          <p className="text-red-500">{message}</p>
+                        )}
+                      />
 
               {index !== fields.length - 1 && (
-                <button type="button" onClick={() => remove(index)}>
+                <button type="button" onClick={() => onHandleDelete(index)}>
                   Remove
                 </button>
               )}

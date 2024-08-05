@@ -51,25 +51,22 @@ export default function App({ Component, pageProps }: AppProps) {
     name: "general",
   });
 
- 
-
- 
-
 
   const submitForm = () => {
     firstMethod.trigger();
     secondMethod.trigger();
+    generalMethod.trigger();
   };
  
-  const first = firstMethod.watch().colors;
+  
   const second = secondMethod.watch().variants;
   const general = generalMethod.watch().general;
- 
+  
   return (
     <>
       <div className="mb-8">
         <FormProvider {...firstMethod}>
-          <Second general={general} {...rest} />
+          <Second general={general} second={second} {...rest} />
         </FormProvider>
       </div>
       <div className="h-[1px] bg-black w-full"></div>

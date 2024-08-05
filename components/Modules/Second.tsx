@@ -1,15 +1,16 @@
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from "@ant-design/icons";
+import { ErrorMessage } from "@hookform/error-message";
 
-import { Image, Input, Upload } from 'antd';
-import { ChangeEvent } from 'react';
+import { Image, Input, Upload } from "antd";
+import { ChangeEvent } from "react";
 import {
   Controller,
   useFieldArray,
   useFormContext,
   useWatch,
-} from 'react-hook-form';
+} from "react-hook-form";
 
-const Second = ({ general, ...rest }: any) => {
+const Second = ({ general, second, ...rest }: any) => {
   const {
     register,
     control,
@@ -21,46 +22,59 @@ const Second = ({ general, ...rest }: any) => {
     clearErrors,
     formState: { errors },
   } = useFormContext();
-   const { append: appendGeneral, update: updateGeneral, remove: removeGeneral  } = rest;
+  const {
+    append: appendGeneral,
+    update: updateGeneral,
+    remove: removeGeneral,
+  } = rest;
 
   const { fields, append, remove, update } = useFieldArray({
     control,
-    name: 'colors',
+    name: "colors",
   });
 
   const colorsCurrent = useWatch({
     control,
-    name: 'colors',
+    name: "colors",
   });
 
   const onSubmit = (data: any) => {
-    console.log('submit >>', data);
+    console.log("submit >>", data);
   };
-
-
 
   const handleAddFieldText = (id: string, value: string, index: number) => {
     if (id == fields[fields.length - 1].id) {
-      append({ image: null, name: '' });
-      appendGeneral( {
+      append({ image: null, name: "" });
+      console.log(second);
+      appendGeneral({
         image: null,
         name: value,
-        variants: [
-          {
-            value: false,
-            price: 0,
-            price_sale: 0,
-            quantity: 0,
-            SKU: ''
-          }
-        ]
+        variants:
+          second.length > 1
+            ? second.slice(0, -1).map((i: any) => {
+                return {
+                  value: i.value,
+                  price: 0,
+                  price_sale: 0,
+                  quantity: 0,
+                  SKU: "",
+                };
+              })
+            : [
+                {
+                  value: false,
+                  price: 0,
+                  price_sale: 0,
+                  quantity: 0,
+                  SKU: "",
+                },
+              ],
       });
-     
-    }else {
+    } else {
       updateGeneral(index, {
         ...general[index],
-        name: value
-      })
+        name: value,
+      });
     }
   };
 
@@ -73,55 +87,57 @@ const Second = ({ general, ...rest }: any) => {
     trigger();
 
     if (id == fields[fields.length - 1].id) {
-      append({ image: null, name: '' });
-      appendGeneral( {
+      append({ image: null, name: "" });
+      appendGeneral({
         image: file.originFileObj,
-        name: '',
+        name: "",
         variants: [
           {
             value: false,
             price: 0,
             price_sale: 0,
             quantity: 0,
-            SKU: ''
-          }
-        ]
+            SKU: "",
+          },
+        ],
       });
-     
-    }else {
+    } else {
       updateGeneral(index, {
         ...general[index],
-        image: file.originFileObj
-      })
+        image: file.originFileObj,
+      });
     }
   };
 
-  const changeInput = (e: ChangeEvent<HTMLInputElement>, id: string , field: any, index: number) => {
+  const changeInput = (
+    e: ChangeEvent<HTMLInputElement>,
+    id: string,
+    field: any,
+    index: number
+  ) => {
     field.onChange(e.target.value);
-    handleAddFieldText(id,e.target.value, index);
+    handleAddFieldText(id, e.target.value, index);
     trigger();
-    
-    
-   // console.log(listColor.colors)
-   //console.log(general)
-  //  const data = general.map((item: any,key: any) => {
-  //     if(key == index) {
-  //        return {
-  //           ...item,
-  //           name: e.target.value
-  //        }
-  //     }
-  //     return item;
-  //  })
-   //setGeneral(data);
-   //console.log(data);
-  
-  }
+
+    // console.log(listColor.colors)
+    //console.log(general)
+    //  const data = general.map((item: any,key: any) => {
+    //     if(key == index) {
+    //        return {
+    //           ...item,
+    //           name: e.target.value
+    //        }
+    //     }
+    //     return item;
+    //  })
+    //setGeneral(data);
+    //console.log(data);
+  };
 
   const setGeneral = (data: any) => {
-   // replaceGeneral(data);
-  }
-  
+    // replaceGeneral(data);
+  };
+
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -147,7 +163,7 @@ const Second = ({ general, ...rest }: any) => {
                   />
                 ) : (
                   <button
-                    style={{ border: 0, background: 'none' }}
+                    style={{ border: 0, background: "none" }}
                     type="button"
                   >
                     <PlusOutlined />
@@ -155,11 +171,13 @@ const Second = ({ general, ...rest }: any) => {
                   </button>
                 )}
               </Upload>
-              {errors.colors && errors.colors[index] && (
-                <span className="text-red-500">
-                  {errors?.colors[index]?.image?.message}
-                </span>
-              )}
+              <ErrorMessage
+                errors={errors}
+                name={`colors.${index}.image`}
+                render={({ message }) => (
+                  <p className="text-red-500">{message}</p>
+                )}
+              />
               <Controller
                 name={`colors.${index}.name`}
                 control={control}
@@ -168,32 +186,37 @@ const Second = ({ general, ...rest }: any) => {
                     type="text"
                     placeholder="Enter name"
                     onChange={(e) => {
-                      changeInput(e, item.id, field, index)
+                      changeInput(e, item.id, field, index);
                     }}
                     value={field.value}
                   />
-
                 )}
               />
-              {errors?.colors && errors?.colors[index] && (
-                <span className="text-red-500">
-                  {errors?.colors[index]?.name?.message}
-                </span>
-              )}
+              <ErrorMessage
+                errors={errors}
+                name={`colors.${index}.name`}
+                render={({ message }) => (
+                  <p className="text-red-500">{message}</p>
+                )}
+              />
 
-              {index !== fields.length - 1 && <button type="button" onClick={() => {removeGeneral(index); remove(index)} }>
-                Remove
-              </button>}
+              {index !== fields.length - 1 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    removeGeneral(index);
+                    remove(index);
+                  }}
+                >
+                  Remove
+                </button>
+              )}
             </div>
           ))}
         </div>
-
-
       </form>
-
     </>
   );
 };
-
 
 export default Second;
